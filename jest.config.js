@@ -17,9 +17,7 @@ module.exports = {
     '!src/renderer/index.tsx', // Exclude entry points
   ],
   setupFilesAfterEnv: ['<rootDir>/tests/setup.ts'],
-  moduleNameMapping: {
-    '^@/(.*)$': '<rootDir>/src/$1',
-  },
+  modulePathIgnorePatterns: ['<rootDir>/dist/', '<rootDir>/release/'],
   testTimeout: 30000, // 30 seconds for API tests
   verbose: true,
 };

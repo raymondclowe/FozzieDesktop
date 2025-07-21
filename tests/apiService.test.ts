@@ -14,18 +14,18 @@ describe('APIService', () => {
 
   describe('validateAPIKey', () => {
     it('should validate OpenRouter API key format', () => {
-      const result = validateAPIKey('sk-or-v1-test123456789', 'https://openrouter.ai/api/v1');
+      const result = validateAPIKey('sk-or-v1-test123456789abcdef', 'https://openrouter.ai/api/v1');
       expect(result.valid).toBe(true);
     });
 
     it('should reject invalid OpenRouter API key format', () => {
-      const result = validateAPIKey('invalid-key', 'https://openrouter.ai/api/v1');
+      const result = validateAPIKey('sk-invalid-key-that-is-long-enough', 'https://openrouter.ai/api/v1');
       expect(result.valid).toBe(false);
       expect(result.message).toContain('OpenRouter API keys should start with "sk-or-v1-"');
     });
 
     it('should validate OpenAI API key format', () => {
-      const result = validateAPIKey('sk-test123456789', 'https://api.openai.com/v1');
+      const result = validateAPIKey('sk-test123456789abcdef', 'https://api.openai.com/v1');
       expect(result.valid).toBe(true);
     });
 
