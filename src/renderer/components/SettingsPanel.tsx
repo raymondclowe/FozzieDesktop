@@ -1,5 +1,12 @@
 import React, { useState } from 'react';
 import { Settings } from '../App';
+import { MCPConfiguration } from './MCPConfiguration';
+
+interface MCPServer {
+  command: string;
+  args: string[];
+  env?: Record<string, string>;
+}
 
 interface SettingsPanelProps {
   isOpen: boolean;
@@ -16,6 +23,8 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
 }) => {
   const [localSettings, setLocalSettings] = useState<Settings>(settings);
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
+  const [mcpServers, setMcpServers] = useState<Record<string, MCPServer>>({});
+  const [activeTab, setActiveTab] = useState<'general' | 'ai' | 'mcp' | 'appearance'>('general');
 
   const handleSave = (): void => {
     setSaveStatus('saving');
@@ -57,111 +66,146 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
         </button>
       </div>
 
-      <div className="settings-section">
-        <h3>AI Provider</h3>
-        
-        <div className="form-group">
-          <label>API Endpoint</label>
-          <input
-            type="text"
-            value={localSettings.apiEndpoint}
-            onChange={e => updateSetting('apiEndpoint', e.target.value)}
-            placeholder="https://api.openai.com/v1"
-          />
-        </div>
-
-        <div className="form-group">
-          <label>API Key</label>
-          <input
-            type="password"
-            value={localSettings.apiKey}
-            onChange={e => updateSetting('apiKey', e.target.value)}
-            placeholder="Enter your API key"
-          />
-        </div>
-
-        <div className="form-group">
-          <label>Model</label>
-          <select
-            value={localSettings.selectedModel}
-            onChange={e => updateSetting('selectedModel', e.target.value)}
+      {/* Tab Navigation */}
+      <div style={{ 
+        display: 'flex', 
+        borderBottom: '1px solid var(--border-color)', 
+        marginBottom: '24px' 
+      }}>
+        {[
+          { key: 'general', label: 'General' },
+          { key: 'ai', label: 'AI Provider' },
+          { key: 'mcp', label: 'MCP Servers' },
+          { key: 'appearance', label: 'Appearance' },
+        ].map(tab => (
+          <button
+            key={tab.key}
+            onClick={() => setActiveTab(tab.key as any)}
+            style={{
+              padding: '12px 16px',
+              background: 'none',
+              border: 'none',
+              borderBottom: `2px solid ${activeTab === tab.key ? 'var(--primary-color)' : 'transparent'}`,
+              color: activeTab === tab.key ? 'var(--primary-color)' : 'var(--text-color)',
+              cursor: 'pointer',
+              fontSize: '14px',
+              fontWeight: activeTab === tab.key ? 'bold' : 'normal',
+            }}
           >
-            {availableModels.map(model => (
-              <option key={model} value={model}>
-                {model}
-              </option>
-            ))}
-          </select>
-        </div>
+            {tab.label}
+          </button>
+        ))}
       </div>
 
-      <div className="settings-section">
-        <h3>Generation Parameters</h3>
-        
-        <div className="form-group">
-          <label>Max Tokens: {localSettings.maxTokens}</label>
-          <input
-            type="range"
-            min="256"
-            max="4096"
-            step="256"
-            value={localSettings.maxTokens}
-            onChange={e => updateSetting('maxTokens', parseInt(e.target.value))}
-          />
+      {activeTab === 'general' && (
+        <div className="settings-section">
+          <h3>General Settings</h3>
+          
+          <div className="checkbox-group">
+            <input
+              type="checkbox"
+              id="fozzie-mode"
+              checked={localSettings.fozzieMode}
+              onChange={e => updateSetting('fozzieMode', e.target.checked)}
+            />
+            <label htmlFor="fozzie-mode">Enable Fozzie Bear Joke Mode 🐻</label>
+          </div>
         </div>
+      )}
 
-        <div className="form-group">
-          <label>Temperature: {localSettings.temperature}</label>
-          <input
-            type="range"
-            min="0"
-            max="2"
-            step="0.1"
-            value={localSettings.temperature}
-            onChange={e => updateSetting('temperature', parseFloat(e.target.value))}
-          />
-        </div>
-      </div>
+      {activeTab === 'ai' && (
+        <>
+          <div className="settings-section">
+            <h3>AI Provider</h3>
+            
+            <div className="form-group">
+              <label>API Endpoint</label>
+              <input
+                type="text"
+                value={localSettings.apiEndpoint}
+                onChange={e => updateSetting('apiEndpoint', e.target.value)}
+                placeholder="https://api.openai.com/v1"
+              />
+            </div>
 
-      <div className="settings-section">
-        <h3>Appearance</h3>
-        
-        <div className="form-group">
-          <label>Theme</label>
-          <select
-            value={localSettings.theme}
-            onChange={e => updateSetting('theme', e.target.value as 'light' | 'dark')}
-          >
-            <option value="light">Light</option>
-            <option value="dark">Dark</option>
-          </select>
-        </div>
+            <div className="form-group">
+              <label>API Key</label>
+              <input
+                type="password"
+                value={localSettings.apiKey}
+                onChange={e => updateSetting('apiKey', e.target.value)}
+                placeholder="Enter your API key"
+              />
+            </div>
 
-        <div className="checkbox-group">
-          <input
-            type="checkbox"
-            id="fozzie-mode"
-            checked={localSettings.fozzieMode}
-            onChange={e => updateSetting('fozzieMode', e.target.checked)}
-          />
-          <label htmlFor="fozzie-mode">Enable Fozzie Bear Joke Mode 🐻</label>
-        </div>
-      </div>
+            <div className="form-group">
+              <label>Model</label>
+              <select
+                value={localSettings.selectedModel}
+                onChange={e => updateSetting('selectedModel', e.target.value)}
+              >
+                {availableModels.map(model => (
+                  <option key={model} value={model}>
+                    {model}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
 
-      <div className="settings-section">
-        <h3>MCP Configuration</h3>
-        <div className="form-group">
-          <label>MCP Config File</label>
-          <textarea
-            rows={6}
-            placeholder='{"mcpServers": {"example": {"command": "example-server", "args": ["--port", "3000"]}}}'
-            style={{ fontFamily: 'monospace', fontSize: '12px' }}
-          />
-          <small style={{ display: 'block', marginTop: '4px', opacity: 0.7 }}>
-            JSON configuration for MCP servers (claude_desktop_config.json format)
-          </small>
+          <div className="settings-section">
+            <h3>Generation Parameters</h3>
+            
+            <div className="form-group">
+              <label>Max Tokens: {localSettings.maxTokens}</label>
+              <input
+                type="range"
+                min="256"
+                max="4096"
+                step="256"
+                value={localSettings.maxTokens}
+                onChange={e => updateSetting('maxTokens', parseInt(e.target.value))}
+              />
+            </div>
+
+            <div className="form-group">
+              <label>Temperature: {localSettings.temperature}</label>
+              <input
+                type="range"
+                min="0"
+                max="2"
+                step="0.1"
+                value={localSettings.temperature}
+                onChange={e => updateSetting('temperature', parseFloat(e.target.value))}
+              />
+            </div>
+          </div>
+        </>
+      )}
+
+      {activeTab === 'mcp' && (
+        <MCPConfiguration
+          config={mcpServers}
+          onUpdateConfig={setMcpServers}
+        />
+      )}
+
+      {activeTab === 'appearance' && (
+        <div className="settings-section">
+          <h3>Appearance</h3>
+          
+          <div className="form-group">
+            <label>Theme</label>
+            <select
+              value={localSettings.theme}
+              onChange={e => updateSetting('theme', e.target.value as 'light' | 'dark')}
+            >
+              <option value="light">Light</option>
+              <option value="dark">Dark</option>
+            </select>
+          </div>
         </div>
-      </div>
+      )}
 
       <div style={{ display: 'flex', gap: '12px', marginTop: '24px' }}>
         <button
