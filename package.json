@@ -11,9 +11,20 @@
     "electron": "electron .",
     "electron-dev": "npm run build-dev && electron .",
     "start": "npm run build && npm run electron",
+    "dist": "npm run build && electron-builder",
+    "dist:win": "npm run build && electron-builder --win",
+    "dist:linux": "npm run build && electron-builder --linux",
+    "publish": "npm run build && electron-builder --publish=always",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": ["electron", "ai", "chat", "mcp", "desktop", "foss"],
+  "keywords": [
+    "electron",
+    "ai",
+    "chat",
+    "mcp",
+    "desktop",
+    "foss"
+  ],
   "author": "FozzieDesktop Contributors",
   "license": "MIT",
   "devDependencies": {
@@ -21,6 +32,7 @@
     "@types/node": "^24.0.15",
     "css-loader": "^7.1.2",
     "electron": "^37.2.3",
+    "electron-builder": "^26.0.12",
     "html-webpack-plugin": "^5.6.3",
     "style-loader": "^4.0.0",
     "ts-loader": "^9.5.2",
@@ -34,5 +46,52 @@
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "typescript": "^5.8.3"
+  },
+  "build": {
+    "appId": "com.fozziedesktop.app",
+    "productName": "FozzieDesktop",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "dist/**/*",
+      "package.json"
+    ],
+    "extraMetadata": {
+      "main": "dist/main.js"
+    },
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": ["x64"]
+        },
+        {
+          "target": "zip",
+          "arch": ["x64"]
+        }
+      ]
+    },
+    "linux": {
+      "target": [
+        {
+          "target": "AppImage",
+          "arch": ["x64"]
+        },
+        {
+          "target": "tar.gz",
+          "arch": ["x64"]
+        }
+      ],
+      "category": "Utility"
+    },
+    "mac": {
+      "target": [
+        {
+          "target": "dmg",
+          "arch": ["x64", "arm64"]
+        }
+      ]
+    }
   }
 }

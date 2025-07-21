@@ -1,0 +1,144 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to release (e.g., v1.0.0)'
+        required: true
+        default: 'v1.0.0'
+
+env:
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+jobs:
+  release:
+    name: Build and Release
+    runs-on: ${{ matrix.os }}
+    
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          
+      - name: Install dependencies
+        run: npm ci
+        
+      - name: Build application
+        run: npm run build
+        
+      - name: Build release packages (Linux)
+        if: matrix.os == 'ubuntu-latest'
+        run: npm run dist:linux
+        
+      - name: Build release packages (Windows)
+        if: matrix.os == 'windows-latest'
+        run: npm run dist:win
+        
+      - name: Upload Linux artifacts
+        if: matrix.os == 'ubuntu-latest'
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-release
+          path: release/*
+          retention-days: 30
+          
+      - name: Upload Windows artifacts
+        if: matrix.os == 'windows-latest'
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-release
+          path: release/*
+          retention-days: 30
+
+  create-release:
+    name: Create GitHub Release
+    needs: release
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+          
+      - name: Get version
+        id: version
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "version=${{ github.event.inputs.version }}" >> $GITHUB_OUTPUT
+          else
+            echo "version=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+          fi
+          
+      - name: List artifacts for debugging
+        run: find artifacts -type f -name "*" | head -20
+          
+      - name: Create Release with GitHub CLI
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          
+          # Create release notes
+          cat > release_notes.md << 'EOF'
+          ## FozzieDesktop ${{ steps.version.outputs.version }}
+          
+          Ready-to-run binaries for Windows and Linux.
+          
+          ### Features
+          - 🤖 AI Chat with multiple provider support (OpenAI, Claude, etc.)
+          - 🐻 Fozzie Bear joke mode ("Wocka wocka!")
+          - 🔧 MCP (Model Context Protocol) server integration
+          - ⚙️ Comprehensive settings and configuration
+          - 🎨 Dark/Light theme support
+          
+          ### Downloads
+          
+          **Windows:**
+          - `.exe` installer for easy installation
+          - `.zip` portable version
+          
+          **Linux:**
+          - `.AppImage` for universal Linux compatibility
+          - `.tar.gz` archive
+          
+          ### Quick Start
+          1. Download the appropriate file for your platform
+          2. Install/extract and run FozzieDesktop
+          3. Configure your AI provider in Settings
+          4. Start chatting!
+          
+          For more information, see the [README](https://github.com/raymondclowe/FozzieDesktop/blob/main/README.md).
+          EOF
+          
+          # Create the release
+          gh release create "$VERSION" \
+            --title "FozzieDesktop $VERSION" \
+            --notes-file release_notes.md \
+            --draft=false \
+            --prerelease=false
+          
+          # Upload all artifacts found
+          for file in artifacts/*/*.{AppImage,tar.gz,exe,zip}; do
+            if [ -f "$file" ]; then
+              echo "Uploading: $file"
+              gh release upload "$VERSION" "$file" || echo "Failed to upload $file"
+            fi
+          done
