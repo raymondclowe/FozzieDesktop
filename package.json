@@ -15,9 +15,9 @@
     "dist:win": "npm run build && electron-builder --win",
     "dist:linux": "npm run build && electron-builder --linux",
     "publish": "npm run build && electron-builder --publish=always",
-    "test": "jest",
+    "test": "node --experimental-fetch --no-warnings ./node_modules/.bin/jest",
     "test:api": "node scripts/test-api.js",
-    "test:ci": "jest --ci --coverage --watchAll=false"
+    "test:ci": "node --experimental-fetch --no-warnings ./node_modules/.bin/jest --ci --coverage --watchAll=false"
   },
   "keywords": [
     "electron",
@@ -42,6 +42,7 @@
     "style-loader": "^4.0.0",
     "ts-jest": "^29.2.5",
     "ts-loader": "^9.5.2",
+    "undici": "^7.12.0",
     "webpack": "^5.100.2",
     "webpack-cli": "^6.0.1",
     "webpack-dev-server": "^5.2.2"
@@ -70,11 +71,15 @@
       "target": [
         {
           "target": "nsis",
-          "arch": ["x64"]
+          "arch": [
+            "x64"
+          ]
         },
         {
           "target": "zip",
-          "arch": ["x64"]
+          "arch": [
+            "x64"
+          ]
         }
       ]
     },
@@ -82,11 +87,15 @@
       "target": [
         {
           "target": "AppImage",
-          "arch": ["x64"]
+          "arch": [
+            "x64"
+          ]
         },
         {
           "target": "tar.gz",
-          "arch": ["x64"]
+          "arch": [
+            "x64"
+          ]
         }
       ],
       "category": "Utility"
@@ -95,7 +104,10 @@
       "target": [
         {
           "target": "dmg",
-          "arch": ["x64", "arm64"]
+          "arch": [
+            "x64",
+            "arm64"
+          ]
         }
       ]
     }
