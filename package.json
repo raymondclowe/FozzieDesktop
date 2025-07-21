@@ -1,0 +1,38 @@
+{
+  "name": "fozziedesktop",
+  "version": "1.0.0",
+  "description": "A FOSS Desktop app for chatting with AI with MCP server integration",
+  "main": "dist/main.js",
+  "homepage": "./",
+  "scripts": {
+    "build": "webpack --mode production",
+    "build-dev": "webpack --mode development",
+    "dev": "webpack serve --mode development",
+    "electron": "electron .",
+    "electron-dev": "npm run build-dev && electron .",
+    "start": "npm run build && npm run electron",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": ["electron", "ai", "chat", "mcp", "desktop", "foss"],
+  "author": "FozzieDesktop Contributors",
+  "license": "MIT",
+  "devDependencies": {
+    "@electron/rebuild": "^3.7.2",
+    "@types/node": "^24.0.15",
+    "css-loader": "^7.1.2",
+    "electron": "^37.2.3",
+    "html-webpack-plugin": "^5.6.3",
+    "style-loader": "^4.0.0",
+    "ts-loader": "^9.5.2",
+    "webpack": "^5.100.2",
+    "webpack-cli": "^6.0.1",
+    "webpack-dev-server": "^5.2.2"
+  },
+  "dependencies": {
+    "@types/react": "^19.1.8",
+    "@types/react-dom": "^19.1.6",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "typescript": "^5.8.3"
+  }
+}
