@@ -13,6 +13,7 @@ on:
 
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
 
 jobs:
   release:
@@ -35,6 +36,15 @@ jobs:
           
       - name: Install dependencies
         run: npm ci
+        
+      - name: Test API integration with GitHub secret
+        env:
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+        run: |
+          echo "🧪 Testing API integration..."
+          npm run test:api
+          echo "🧪 Running Jest tests..."
+          npm run test:ci
         
       - name: Build application
         run: npm run build

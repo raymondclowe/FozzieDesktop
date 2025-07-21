@@ -5,6 +5,7 @@ import { ChatHeader } from './components/ChatHeader';
 import { ChatInput } from './components/ChatInput';
 import { SettingsPanel } from './components/SettingsPanel';
 import { WelcomeScreen } from './components/WelcomeScreen';
+import { APIService } from '../services/apiService';
 
 export interface Message {
   id: string;
@@ -34,8 +35,8 @@ export interface Settings {
 
 const defaultSettings: Settings = {
   apiKey: '',
-  selectedModel: 'gpt-3.5-turbo',
-  apiEndpoint: 'https://api.openai.com/v1',
+  selectedModel: 'openai/gpt-3.5-turbo',
+  apiEndpoint: 'https://openrouter.ai/api/v1',
   fozzieMode: false,
   theme: 'light',
   maxTokens: 2048,
@@ -151,10 +152,29 @@ export const App: React.FC = () => {
     setIsLoading(true);
 
     try {
-      // Simulate AI response (replace with actual API call)
-      await new Promise(resolve => setTimeout(resolve, 1000 + Math.random() * 2000));
+      let responseContent: string;
       
-      let responseContent = generateMockResponse(content);
+      // Use real API if key is configured, otherwise fall back to mock
+      if (settings.apiKey && settings.apiKey.trim().length > 0) {
+        const apiService = new APIService(settings);
+        const currentChat = getCurrentChat();
+        
+        // Prepare message history for API
+        const messageHistory = currentChat?.messages.map(msg => ({
+          role: msg.role,
+          content: msg.content
+        })) || [];
+        
+        // Add the new user message
+        messageHistory.push({ role: 'user', content: content.trim() });
+        
+        // Call the real API
+        responseContent = await apiService.sendChatMessage(messageHistory);
+      } else {
+        // Fall back to mock response
+        await new Promise(resolve => setTimeout(resolve, 1000 + Math.random() * 2000));
+        responseContent = generateMockResponse(content);
+      }
       
       // Apply Fozzie mode if enabled
       if (settings.fozzieMode) {
@@ -180,10 +200,25 @@ export const App: React.FC = () => {
       ));
     } catch (error) {
       console.error('Error sending message:', error);
+      
+      let errorContent = 'Sorry, I encountered an error while processing your request.';
+      
+      if (error instanceof Error) {
+        if (error.message.includes('API key')) {
+          errorContent = 'Please configure your API key in Settings to enable AI responses.';
+        } else if (error.message.includes('401')) {
+          errorContent = 'Invalid API key. Please check your API key in Settings.';
+        } else if (error.message.includes('429')) {
+          errorContent = 'Rate limit exceeded. Please try again in a moment.';
+        } else {
+          errorContent = `Error: ${error.message}`;
+        }
+      }
+      
       // Add error message
       const errorMessage: Message = {
         id: (Date.now() + 1).toString(),
-        content: 'Sorry, I encountered an error while processing your request. Please check your settings and try again.',
+        content: errorContent,
         role: 'assistant',
         timestamp: new Date(),
       };
@@ -210,7 +245,7 @@ export const App: React.FC = () => {
       "Let me help you with that. Regarding " + input.toLowerCase() + ", here's my response...",
     ];
     
-    return responses[Math.floor(Math.random() * responses.length)] + " This is a mock response for demonstration purposes. Please configure your AI provider in the settings to get real AI responses.";
+    return responses[Math.floor(Math.random() * responses.length)] + " (This is a mock response - configure your API key in Settings for real AI responses.)";
   };
 
   const applyFozzieMode = (content: string): string => {
