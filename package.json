@@ -30,9 +30,13 @@
   "author": "FozzieDesktop Contributors",
   "license": "MIT",
   "devDependencies": {
+    "@babel/core": "^7.28.0",
+    "@babel/preset-env": "^7.28.0",
+    "@babel/preset-typescript": "^7.27.1",
     "@electron/rebuild": "^3.7.2",
     "@types/jest": "^29.5.14",
     "@types/node": "^24.0.15",
+    "babel-plugin-istanbul": "^7.0.0",
     "css-loader": "^7.1.2",
     "dotenv": "^16.4.7",
     "electron": "^37.2.3",
