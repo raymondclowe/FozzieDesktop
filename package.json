@@ -111,5 +111,10 @@
         }
       ]
     }
+  },
+  "overrides": {
+    "glob": "^10.4.5",
+    "rimraf": "^5.0.0",
+    "@npmcli/move-file": "npm:@npmcli/fs@^4.0.0"
   }
 }
