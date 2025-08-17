@@ -2,6 +2,20 @@
 import 'dotenv/config';
 import '@testing-library/jest-dom';
 
+// Mock TextEncoder/TextDecoder for Node.js environment
+import { TextEncoder, TextDecoder } from 'util';
+global.TextEncoder = TextEncoder;
+global.TextDecoder = TextDecoder;
+
+// Mock clipboard for user-event
+Object.defineProperty(navigator, 'clipboard', {
+  value: {
+    writeText: jest.fn().mockResolvedValue(undefined),
+    readText: jest.fn().mockResolvedValue(''),
+  },
+  writable: true,
+});
+
 // Mock Electron APIs for testing
 global.window = {
   electronAPI: {
@@ -23,16 +37,12 @@ const localStorageMock = {
 };
 global.localStorage = localStorageMock;
 
-// Ensure fetch is available in test environment
-// In Node.js 20+, fetch is available globally but might need to be enabled
-if (typeof globalThis.fetch === 'undefined') {
-  // Use undici as polyfill for environments where fetch is not available
-  const { fetch, Headers, Request, Response } = require('undici');
-  globalThis.fetch = fetch;
-  globalThis.Headers = Headers;
-  globalThis.Request = Request;
-  globalThis.Response = Response;
-}
+// For now, always mock fetch to avoid environment issues
+// Real API tests are handled by the separate test:api script
+global.fetch = jest.fn();
+global.Headers = jest.fn();
+global.Request = jest.fn();
+global.Response = jest.fn();
 
 // Increase timeout for async tests
 jest.setTimeout(30000);

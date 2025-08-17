@@ -67,7 +67,7 @@ async function runUnitTests() {
   log('\n🧪 Running Unit Tests...', colors.magenta);
   
   try {
-    await runCommand('npm', ['test', '--', '--testPathPattern=apiService.test.ts']);
+    await runCommand('npm', ['test', '--', '--testPathPatterns=apiService.test.ts']);
     log('✅ API Service tests passed', colors.green);
   } catch (error) {
     log('❌ API Service tests failed', colors.red);

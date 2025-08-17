@@ -22,7 +22,4 @@ module.exports = {
   modulePathIgnorePatterns: ['<rootDir>/dist/', '<rootDir>/release/'],
   testTimeout: 30000,
   verbose: true,
-  moduleNameMapping: {
-    '\\.(css|less|scss|sass)$': 'identity-obj-proxy',
-  },
 };

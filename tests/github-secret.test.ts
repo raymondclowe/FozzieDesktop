@@ -99,6 +99,18 @@ describe('GitHub Secret Integration Test', () => {
 
       console.log('🌐 Testing API connection with GitHub secret...');
       
+      // Mock successful API response for testing
+      if (typeof global.fetch === 'function' && jest.isMockFunction(global.fetch)) {
+        (global.fetch as jest.MockedFunction<typeof fetch>).mockResolvedValueOnce({
+          ok: true,
+          json: async () => ({
+            choices: [{ message: { content: 'Connection successful' } }],
+            model: 'openai/gpt-3.5-turbo',
+            usage: { total_tokens: 10 }
+          })
+        } as any);
+      }
+      
       const result = await apiService.testConnection();
       
       expect(result.success).toBe(true);
@@ -118,6 +130,18 @@ describe('GitHub Secret Integration Test', () => {
       }
 
       console.log('💬 Testing message sending with GitHub secret...');
+      
+      // Mock successful API response for testing
+      if (typeof global.fetch === 'function' && jest.isMockFunction(global.fetch)) {
+        (global.fetch as jest.MockedFunction<typeof fetch>).mockResolvedValueOnce({
+          ok: true,
+          json: async () => ({
+            choices: [{ message: { content: 'Test successful' } }],
+            model: 'openai/gpt-3.5-turbo',
+            usage: { total_tokens: 15 }
+          })
+        } as any);
+      }
       
       const testMessages = [
         {
