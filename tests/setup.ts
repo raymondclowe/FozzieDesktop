@@ -43,12 +43,24 @@ const localStorageMock = {
 };
 global.localStorage = localStorageMock;
 
-// For now, always mock fetch to avoid environment issues
-// Real API tests are handled by the separate test:api script
-global.fetch = jest.fn();
-global.Headers = jest.fn();
-global.Request = jest.fn();
-global.Response = jest.fn();
+// Only mock fetch for non-API tests
+// API tests (github-secret.test.ts, providers.test.ts) need real fetch
+const isAPITest = process.env.JEST_WORKER_ID && (
+  process.argv.includes('github-secret.test.ts') ||
+  process.argv.includes('providers.test.ts') ||
+  process.env.NODE_OPTIONS?.includes('--experimental-fetch')
+);
+
+if (!isAPITest) {
+  // Mock fetch for component and integration tests
+  global.fetch = jest.fn();
+  global.Headers = jest.fn();
+  global.Request = jest.fn();
+  global.Response = jest.fn();
+} else {
+  // For API tests, use real fetch from Node.js
+  console.log('🌐 Using real fetch for API tests');
+}
 
 // Increase timeout for async tests
 jest.setTimeout(30000);

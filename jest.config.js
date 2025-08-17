@@ -8,7 +8,9 @@ module.exports = {
     '**/*.(test|spec).(ts|tsx|js)'
   ],
   testPathIgnorePatterns: [
-    '<rootDir>/tests/e2e/'
+    '<rootDir>/tests/e2e/',
+    '<rootDir>/tests/github-secret.test.ts',
+    '<rootDir>/tests/providers.test.ts'
   ],
   transform: {
     '^.+\\.(ts|tsx)$': ['ts-jest', {
