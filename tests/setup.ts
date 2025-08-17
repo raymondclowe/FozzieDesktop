@@ -7,14 +7,20 @@ import { TextEncoder, TextDecoder } from 'util';
 global.TextEncoder = TextEncoder;
 global.TextDecoder = TextDecoder;
 
-// Mock clipboard for user-event
-Object.defineProperty(navigator, 'clipboard', {
-  value: {
-    writeText: jest.fn().mockResolvedValue(undefined),
-    readText: jest.fn().mockResolvedValue(''),
-  },
-  writable: true,
-});
+// Mock DOM methods not available in jsdom
+Element.prototype.scrollIntoView = jest.fn();
+
+// Mock clipboard for user-event - avoid conflicts with testing-library/user-event
+if (!navigator.clipboard) {
+  Object.defineProperty(navigator, 'clipboard', {
+    value: {
+      writeText: jest.fn().mockResolvedValue(undefined),
+      readText: jest.fn().mockResolvedValue(''),
+    },
+    writable: true,
+    configurable: true,
+  });
+}
 
 // Mock Electron APIs for testing
 global.window = {

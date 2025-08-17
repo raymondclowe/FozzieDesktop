@@ -301,7 +301,7 @@ export const App: React.FC = () => {
   const currentChat = getCurrentChat();
 
   return (
-    <div className="app" data-theme={settings.theme}>
+    <div className="app" data-theme={settings.theme} data-testid="app">
       <Sidebar
         chats={chats}
         activeChat={activeChat}

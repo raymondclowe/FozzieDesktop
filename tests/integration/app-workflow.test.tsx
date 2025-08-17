@@ -6,8 +6,16 @@ import { App } from '../../src/renderer/App';
 import { APIService } from '../../src/services/apiService';
 
 // Mock the APIService
-jest.mock('../../src/services/apiService');
-const mockAPIService = APIService as jest.MockedClass<typeof APIService>;
+jest.mock('../../src/services/apiService', () => {
+  return {
+    APIService: jest.fn().mockImplementation(() => ({
+      sendChatMessage: jest.fn(),
+    })),
+  };
+});
+
+const mockAPIService = require('../../src/services/apiService').APIService;
+let mockSendChatMessage: jest.Mock;
 
 // Mock localStorage
 const localStorageMock = {
@@ -28,17 +36,31 @@ Object.defineProperty(navigator, 'clipboard', {
 });
 
 describe('App Integration Tests', () => {
-  let mockSendChatMessage: jest.Mock;
-
   beforeEach(() => {
     jest.clearAllMocks();
-    localStorageMock.getItem.mockReturnValue(null);
-    localStorageMock.setItem.mockImplementation(() => {});
     
+    // Set up mock for APIService instance
     mockSendChatMessage = jest.fn();
     mockAPIService.mockImplementation(() => ({
       sendChatMessage: mockSendChatMessage,
-    }) as any);
+    }));
+    
+    // Set up settings with API key so the app uses APIService instead of fallback
+    const settingsWithApiKey = {
+      apiKey: 'test-api-key',
+      selectedModel: 'openai/gpt-3.5-turbo',
+      apiEndpoint: 'https://api.openai.com/v1',
+      fozzieMode: false,
+      theme: 'light'
+    };
+    
+    localStorageMock.getItem.mockImplementation((key) => {
+      if (key === 'fozzie-settings') {
+        return JSON.stringify(settingsWithApiKey);
+      }
+      return null;
+    });
+    localStorageMock.setItem.mockImplementation(() => {});
   });
 
   it('should render welcome screen when no chats exist', () => {
@@ -53,8 +75,8 @@ describe('App Integration Tests', () => {
 
     render(<App />);
     
-    // Create new chat
-    const newChatButton = screen.getByText(/new chat/i);
+    // Create new chat using the button specifically
+    const newChatButton = screen.getByRole('button', { name: /new chat/i });
     await user.click(newChatButton);
     
     // Should now show chat interface
@@ -67,8 +89,13 @@ describe('App Integration Tests', () => {
     const sendButton = screen.getByRole('button', { name: /send/i });
     await user.click(sendButton);
     
-    // Should show user message
-    expect(screen.getByText('Hello, AI!')).toBeInTheDocument();
+    // Should show user message in the message area specifically  
+    const messageContents = screen.getAllByText('Hello, AI!');
+    // Look for the message in a div with class message-content
+    const userMessage = messageContents.find(el => 
+      el.className.includes('message-content') || el.closest('.message.user')
+    );
+    expect(userMessage).toBeInTheDocument();
     
     // Should show loading state
     expect(screen.getByText(/thinking/i)).toBeInTheDocument();
@@ -83,9 +110,13 @@ describe('App Integration Tests', () => {
     const user = userEvent.setup();
     render(<App />);
     
-    // Open settings
-    const settingsButton = screen.getByLabelText(/settings/i);
+    // Open settings using the settings button
+    const settingsButton = screen.getByText(/⚙️ Settings/);
     await user.click(settingsButton);
+    
+    // Click on AI Provider tab  
+    const aiProviderTab = screen.getByText('AI Provider');
+    await user.click(aiProviderTab);
     
     // Should show settings panel
     expect(screen.getByText('Settings')).toBeInTheDocument();
@@ -114,8 +145,8 @@ describe('App Integration Tests', () => {
 
     render(<App />);
     
-    // Create new chat
-    const newChatButton = screen.getByText(/new chat/i);
+    // Create new chat using the button specifically
+    const newChatButton = screen.getByRole('button', { name: /new chat/i });
     await user.click(newChatButton);
     
     // Toggle Fozzie mode
@@ -179,8 +210,8 @@ describe('App Integration Tests', () => {
 
     render(<App />);
     
-    // Create new chat
-    const newChatButton = screen.getByText(/new chat/i);
+    // Create new chat using the button specifically
+    const newChatButton = screen.getByRole('button', { name: /new chat/i });
     await user.click(newChatButton);
     
     // Send a message
@@ -235,9 +266,13 @@ describe('App Integration Tests', () => {
     const user = userEvent.setup();
     render(<App />);
     
-    // Open settings
-    const settingsButton = screen.getByLabelText(/settings/i);
+    // Open settings using the settings button 
+    const settingsButton = screen.getByText(/⚙️ Settings/);
     await user.click(settingsButton);
+    
+    // Click on Appearance tab
+    const appearanceTab = screen.getByText('Appearance');
+    await user.click(appearanceTab);
     
     // Switch to dark theme
     const themeSelect = screen.getByLabelText(/theme/i);

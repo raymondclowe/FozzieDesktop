@@ -129,8 +129,10 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
             </div>
 
             <div className="form-group">
-              <label>API Key</label>
+              <label htmlFor="api-key-input">API Key</label>
               <input
+                id="api-key-input"
+                data-testid="api-key-input"
                 type="password"
                 value={localSettings.apiKey}
                 onChange={e => updateSetting('apiKey', e.target.value)}
@@ -139,8 +141,10 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
             </div>
 
             <div className="form-group">
-              <label>Model</label>
+              <label htmlFor="model-select">Model</label>
               <select
+                id="model-select"
+                data-testid="model-select"
                 value={localSettings.selectedModel}
                 onChange={e => updateSetting('selectedModel', e.target.value)}
               >
@@ -195,8 +199,9 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
           <h3>Appearance</h3>
           
           <div className="form-group">
-            <label>Theme</label>
+            <label htmlFor="theme-select">Theme</label>
             <select
+              id="theme-select"
               value={localSettings.theme}
               onChange={e => updateSetting('theme', e.target.value as 'light' | 'dark')}
             >

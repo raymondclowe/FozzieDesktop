@@ -17,12 +17,23 @@ jest.mock('../../src/renderer/components/ChatInput', () => ({
       }
     };
 
+    const handleKeyDown = (e: React.KeyboardEvent) => {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        if (message.trim() && !disabled) {
+          onSendMessage(message.trim());
+          setMessage('');
+        }
+      }
+    };
+
     return (
       <form onSubmit={handleSubmit} data-testid="chat-input-form">
         <textarea
           data-testid="message-input"
           value={message}
           onChange={(e) => setMessage(e.target.value)}
+          onKeyDown={handleKeyDown}
           disabled={disabled}
           placeholder="Type your message..."
         />

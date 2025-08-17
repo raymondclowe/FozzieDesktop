@@ -7,6 +7,9 @@ module.exports = {
     '**/__tests__/**/*.(ts|tsx|js)',
     '**/*.(test|spec).(ts|tsx|js)'
   ],
+  testPathIgnorePatterns: [
+    '<rootDir>/tests/e2e/'
+  ],
   transform: {
     '^.+\\.(ts|tsx)$': ['ts-jest', {
       useESM: false,

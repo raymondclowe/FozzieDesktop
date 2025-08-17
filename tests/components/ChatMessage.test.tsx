@@ -79,7 +79,7 @@ describe('ChatMessage Component', () => {
   it('should handle long content correctly', () => {
     const longMessage: Message = {
       ...baseMessage,
-      content: 'This is a very long message that should be handled correctly by the component. '.repeat(10),
+      content: 'This is a very long message that should be handled correctly by the component. '.repeat(10).trim(),
     };
 
     render(<ChatMessage message={longMessage} />);
