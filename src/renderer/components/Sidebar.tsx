@@ -50,7 +50,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
   const formatChatPreview = (chat: Chat): string => {
     if (chat.messages.length === 0) return 'No messages yet';
     const lastMessage = chat.messages[chat.messages.length - 1];
-    return lastMessage.content.slice(0, 60) + (lastMessage.content.length > 60 ? '...' : '');
+    const content = lastMessage.content || '';
+    return content.slice(0, 60) + (content.length > 60 ? '...' : '');
   };
 
   return (
