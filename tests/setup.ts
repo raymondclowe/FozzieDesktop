@@ -1,5 +1,6 @@
 // Jest setup file for additional test configuration
 import 'dotenv/config';
+import '@testing-library/jest-dom';
 
 // Mock Electron APIs for testing
 global.window = {
@@ -12,6 +13,15 @@ global.window = {
     removeAllListeners: jest.fn(),
   }
 } as any;
+
+// Mock localStorage for testing
+const localStorageMock = {
+  getItem: jest.fn(),
+  setItem: jest.fn(),
+  removeItem: jest.fn(),
+  clear: jest.fn(),
+};
+global.localStorage = localStorageMock;
 
 // Ensure fetch is available in test environment
 // In Node.js 20+, fetch is available globally but might need to be enabled

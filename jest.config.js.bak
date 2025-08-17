@@ -1,7 +1,7 @@
 /** @type {import('ts-jest').JestConfigWithTsJest} */
 module.exports = {
   preset: 'ts-jest',
-  testEnvironment: 'jsdom',
+  testEnvironment: 'jsdom', // Changed to jsdom for React component testing
   roots: ['<rootDir>/src', '<rootDir>/tests'],
   testMatch: [
     '**/__tests__/**/*.(ts|tsx|js)',
@@ -9,20 +9,21 @@ module.exports = {
   ],
   transform: {
     '^.+\\.(ts|tsx)$': ['ts-jest', {
+      // ts-jest configuration
       useESM: false,
     }],
   },
   collectCoverageFrom: [
     'src/**/*.(ts|tsx)',
     '!src/**/*.d.ts',
-    '!src/main/**/*',
-    '!src/renderer/index.tsx',
+    '!src/main/**/*', // Exclude Electron main process files
+    '!src/renderer/index.tsx', // Exclude entry points
   ],
   setupFilesAfterEnv: ['<rootDir>/tests/setup.ts'],
   modulePathIgnorePatterns: ['<rootDir>/dist/', '<rootDir>/release/'],
-  testTimeout: 30000,
+  testTimeout: 30000, // 30 seconds for API tests
   verbose: true,
   moduleNameMapping: {
-    '\\.(css|less|scss|sass)$': 'identity-obj-proxy',
+    '\\.(css|less|scss|sass)$': 'identity-obj-proxy', // Mock CSS imports
   },
 };

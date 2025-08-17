@@ -17,7 +17,15 @@
     "publish": "npm run build && electron-builder --publish=always",
     "test": "node --experimental-fetch --no-warnings ./node_modules/.bin/jest",
     "test:api": "node scripts/test-api.js",
-    "test:ci": "node --experimental-fetch --no-warnings ./node_modules/.bin/jest --ci --coverage --watchAll=false"
+    "test:ci": "node --experimental-fetch --no-warnings ./node_modules/.bin/jest --ci --coverage --watchAll=false",
+    "test:components": "npm test -- tests/components",
+    "test:integration": "npm test -- tests/integration",
+    "test:e2e": "npx playwright test",
+    "test:e2e:headed": "npx playwright test --headed",
+    "test:e2e:ui": "npx playwright test --ui",
+    "test:all": "npm run test && npm run test:e2e",
+    "test:coverage": "npm run test:ci && npm run test:e2e",
+    "test:modules": "npm run test:components && npm run test:integration && npm run test:api"
   },
   "keywords": [
     "electron",
@@ -31,6 +39,10 @@
   "license": "MIT",
   "devDependencies": {
     "@electron/rebuild": "^3.7.2",
+    "@playwright/test": "^1.54.2",
+    "@testing-library/jest-dom": "^6.7.0",
+    "@testing-library/react": "^16.3.0",
+    "@testing-library/user-event": "^14.6.1",
     "@types/jest": "^30.0.0",
     "@types/node": "^24.0.15",
     "css-loader": "^7.1.2",
@@ -38,7 +50,10 @@
     "electron": "^37.2.3",
     "electron-builder": "^26.0.12",
     "html-webpack-plugin": "^5.6.3",
+    "identity-obj-proxy": "^3.0.0",
     "jest": "^30.0.4",
+    "jest-environment-jsdom": "^30.0.5",
+    "playwright": "^1.54.2",
     "style-loader": "^4.0.0",
     "ts-jest": "^29.4.0",
     "ts-loader": "^9.5.2",
