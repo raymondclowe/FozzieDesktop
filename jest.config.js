@@ -23,6 +23,7 @@ module.exports = {
     '!src/main/**/*',
     '!src/renderer/index.tsx',
   ],
+  coverageProvider: 'v8',
   setupFilesAfterEnv: ['<rootDir>/tests/setup.ts'],
   modulePathIgnorePatterns: ['<rootDir>/dist/', '<rootDir>/release/'],
   testTimeout: 30000,
