@@ -16,6 +16,7 @@ describe('APIService', () => {
     it('should validate OpenRouter API key format', () => {
       const result = validateAPIKey('sk-or-v1-test123456789abcdef', 'https://openrouter.ai/api/v1');
       expect(result.valid).toBe(true);
+      expect(result.message).toBe('Valid OpenRouter API key format');
     });
 
     it('should reject invalid OpenRouter API key format', () => {
@@ -27,6 +28,19 @@ describe('APIService', () => {
     it('should validate OpenAI API key format', () => {
       const result = validateAPIKey('sk-test123456789abcdef', 'https://api.openai.com/v1');
       expect(result.valid).toBe(true);
+      expect(result.message).toBe('Valid OpenAI API key format');
+    });
+
+    it('should validate Groq API key format', () => {
+      const result = validateAPIKey('gsk_test123456789abcdef', 'https://api.groq.com/openai/v1');
+      expect(result.valid).toBe(true);
+      expect(result.message).toBe('Valid Groq API key format');
+    });
+
+    it('should validate Cloudflare API key format', () => {
+      const result = validateAPIKey('cloudflare-api-key-with-sufficient-length', 'https://api.cloudflare.com/client/v4/accounts/test/ai/v1');
+      expect(result.valid).toBe(true);
+      expect(result.message).toBe('Valid Cloudflare AI API key format');
     });
 
     it('should reject empty API key', () => {
@@ -39,6 +53,12 @@ describe('APIService', () => {
       const result = validateAPIKey('sk-short', 'https://api.openai.com/v1');
       expect(result.valid).toBe(false);
       expect(result.message).toBe('API key appears to be too short');
+    });
+
+    it('should reject Groq key with wrong prefix', () => {
+      const result = validateAPIKey('sk-wrong-prefix-for-groq', 'https://api.groq.com/openai/v1');
+      expect(result.valid).toBe(false);
+      expect(result.message).toContain('Groq API keys should start with "gsk_"');
     });
   });
 
@@ -66,9 +86,28 @@ describe('APIService', () => {
       expect(result).toBe('test-openai-key');
     });
 
+    it('should return CLOUDFLARE_API_KEY when higher priority keys are not available', () => {
+      delete process.env.OPENROUTER_API_KEY;
+      delete process.env.OPENAI_API_KEY;
+      process.env.CLOUDFLARE_API_KEY = 'test-cloudflare-key';
+      const result = getAPIKeyFromEnv();
+      expect(result).toBe('test-cloudflare-key');
+    });
+
+    it('should return GROQ_API_KEY when higher priority keys are not available', () => {
+      delete process.env.OPENROUTER_API_KEY;
+      delete process.env.OPENAI_API_KEY;
+      delete process.env.CLOUDFLARE_API_KEY;
+      process.env.GROQ_API_KEY = 'test-groq-key';
+      const result = getAPIKeyFromEnv();
+      expect(result).toBe('test-groq-key');
+    });
+
     it('should return null when no API key is available', () => {
       delete process.env.OPENROUTER_API_KEY;
       delete process.env.OPENAI_API_KEY;
+      delete process.env.CLOUDFLARE_API_KEY;
+      delete process.env.GROQ_API_KEY;
       delete process.env.AI_API_KEY;
       delete process.env.API_KEY;
       const result = getAPIKeyFromEnv();

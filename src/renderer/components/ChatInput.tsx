@@ -49,6 +49,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({ onSendMessage, disabled = 
         <textarea
           ref={textareaRef}
           className="chat-input"
+          data-testid="message-input"
           placeholder="Type your message... (Shift+Enter for new line)"
           value={message}
           onChange={handleTextChange}
@@ -58,6 +59,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({ onSendMessage, disabled = 
         />
         <button
           className="send-btn"
+          data-testid="send-button"
           onClick={handleSubmit}
           disabled={!message.trim() || disabled}
         >

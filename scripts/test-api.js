@@ -32,7 +32,9 @@ function getAPIKey() {
   // Check multiple possible environment variable names
   const envVars = [
     'OPENROUTER_API_KEY',
-    'OPENAI_API_KEY', 
+    'OPENAI_API_KEY',
+    'CLOUDFLARE_API_KEY', 
+    'GROQ_API_KEY',
     'AI_API_KEY',
     'API_KEY'
   ];
@@ -41,24 +43,54 @@ function getAPIKey() {
     const value = process.env[envVar];
     if (value && value.trim().length > 0) {
       log(`✓ Found API key in ${envVar}`, colors.green);
-      return value.trim();
+      return { key: value.trim(), source: envVar };
     }
   }
 
   return null;
 }
 
-function validateAPIKeyFormat(apiKey) {
-  if (!apiKey || apiKey.length < 20) {
+function validateAPIKeyFormat(apiKey, source) {
+  if (!apiKey || apiKey.length < 10) {
     return { valid: false, message: 'API key appears to be too short' };
   }
 
-  if (apiKey.startsWith('sk-or-v1-')) {
-    return { valid: true, message: 'Valid OpenRouter API key format' };
-  } else if (apiKey.startsWith('sk-')) {
-    return { valid: true, message: 'Valid OpenAI-style API key format' };
+  // Validate based on source environment variable
+  if (source === 'OPENROUTER_API_KEY') {
+    if (apiKey.startsWith('sk-or-v1-')) {
+      return { valid: true, message: 'Valid OpenRouter API key format' };
+    } else {
+      return { valid: false, message: 'OpenRouter API keys should start with "sk-or-v1-"' };
+    }
+  } else if (source === 'OPENAI_API_KEY') {
+    if (apiKey.startsWith('sk-')) {
+      return { valid: true, message: 'Valid OpenAI API key format' };
+    } else {
+      return { valid: false, message: 'OpenAI API keys should start with "sk-"' };
+    }
+  } else if (source === 'GROQ_API_KEY') {
+    if (apiKey.startsWith('gsk_')) {
+      return { valid: true, message: 'Valid Groq API key format' };
+    } else {
+      return { valid: false, message: 'Groq API keys should start with "gsk_"' };
+    }
+  } else if (source === 'CLOUDFLARE_API_KEY') {
+    if (apiKey.length >= 20) {
+      return { valid: true, message: 'Valid Cloudflare API token format' };
+    } else {
+      return { valid: false, message: 'Cloudflare API token appears too short' };
+    }
   } else {
-    return { valid: false, message: 'Unknown API key format' };
+    // Generic validation
+    if (apiKey.startsWith('sk-or-v1-')) {
+      return { valid: true, message: 'Valid OpenRouter API key format' };
+    } else if (apiKey.startsWith('sk-')) {
+      return { valid: true, message: 'Valid OpenAI-style API key format' };
+    } else if (apiKey.startsWith('gsk_')) {
+      return { valid: true, message: 'Valid Groq API key format' };
+    } else {
+      return { valid: true, message: 'API key format accepted (unknown provider)' };
+    }
   }
 }
 
@@ -209,21 +241,23 @@ function printTestResults(result) {
 
 async function main() {
   log('🐻 FozzieDesktop API Test Harness', colors.magenta + colors.bright);
-  log('Testing OpenRouter API integration and GitHub secrets\n');
+  log('Testing multi-provider API integration and GitHub secrets\n');
 
   // Step 1: Check for API key
   log('🔍 Checking for API key...', colors.blue);
-  const apiKey = getAPIKey();
+  const apiKeyResult = getAPIKey();
   
-  if (!apiKey) {
+  if (!apiKeyResult) {
     log('❌ No API key found in environment variables', colors.red);
     printEnvironmentHelp();
     process.exit(1);
   }
 
+  const { key: apiKey, source } = apiKeyResult;
+
   // Step 2: Validate API key format
   log('🔑 Validating API key format...', colors.blue);
-  const validation = validateAPIKeyFormat(apiKey);
+  const validation = validateAPIKeyFormat(apiKey, source);
   
   if (validation.valid) {
     log(`✓ ${validation.message}`, colors.green);
@@ -235,6 +269,7 @@ async function main() {
 
   // Step 3: Test actual API connection
   log('🌐 Testing API connection...', colors.blue);
+  log(`   Source: ${source}`, colors.blue);
   log(`   Endpoint: ${OPENROUTER_ENDPOINT}`, colors.blue);
   log(`   Model: ${TEST_MODEL}`, colors.blue);
   
@@ -247,7 +282,7 @@ async function main() {
   }
 
   log('\n🎯 All tests passed! The API integration is ready for use.', colors.green + colors.bright);
-  log('   This confirms the GitHub secret is accessible and working.\n', colors.green);
+  log(`   This confirms the ${source} secret is accessible and working.\n`, colors.green);
 }
 
 // Handle errors gracefully
